@@ -12,6 +12,7 @@ import os
 import joblib
 import numpy as np
 import cv2
+import random
 
 sys.path.append('/home/morgan/soinn/soinn')
 import openpose_yaml
@@ -79,37 +80,39 @@ def prepare_dataset(N_train, T):
 
     with open(index_file_name, 'r') as f:
         i = 0 # Number of frames currently in the dataset.
-        for line in f:
-            if i < N_train:
-                # Example : CBPJF_000000000016
-                title = line[:18]
-                headtitle = title[:5]
-                # Example : /media/morgan/HDD/Aolab/Data/Charades_keypoints/CBPJF/CBPJF_000000000016_pose.yml
-                file_name = keypoints_dir + title[:5] + '/' + line.strip('\n')
-                print(i)
-                # Open the corresponding yaml file.
-                signals_input = openpose_yaml.load_yaml(file_name)
-                signals_list_42 = [s for s in signals_input if is_reliable(s, T)]
-                signals_list = [delete_confidence(s) for s in signals_list_42]
+        lines = f.read().splitlines()
+        while i < N_train:
+            line = random.choice(lines)
+            print(line)
+            # Example : CBPJF_000000000016
+            title = line[:18]
+            headtitle = title[:5]
+            # Example : /media/morgan/HDD/Aolab/Data/Charades_keypoints/CBPJF/CBPJF_000000000016_pose.yml
+            file_name = keypoints_dir + title[:5] + '/' + line.strip('\n')
+            print(i)
+            # Open the corresponding yaml file.
+            signals_input = openpose_yaml.load_yaml(file_name)
+            signals_list_42 = [s for s in signals_input if is_reliable(s, T)]
+            signals_list = [delete_confidence(s) for s in signals_list_42]
 
-                if len(signals_list) == 1: # If there is one person on the scene
-                    n = charades_poses.shape[0]
-                    charades_poses.resize(n+1, N)
-                    charades_poses[-1, :] = normalize(signals_list[0])
-                    #~ charades_poses[-1,:] = signals_list[0]
-                    i += 1
-                    if headtitle not in video_used:
-                        video_used.append(headtitle)
-                elif len(signals_list) > 1: # If there are more than 1 person on the scene
-                    s = len(signals_list)
-                    n = charades_poses.shape[0]
-                    charades_poses.resize(n+s, N)
-                    for j in range(s):
-                        charades_poses[n+j, :] = normalize(signals_list[j])
-                        #~ charades_poses[n+j, :] = signals_list[j]
-                        i += s
-                    if headtitle not in video_used:
-                        video_used.append(headtitle)
+            if len(signals_list) == 1: # If there is one person on the scene
+                n = charades_poses.shape[0]
+                charades_poses.resize(n+1, N)
+                charades_poses[-1, :] = normalize(signals_list[0])
+                #~ charades_poses[-1,:] = signals_list[0]
+                i += 1
+                if headtitle not in video_used:
+                    video_used.append(headtitle)
+            elif len(signals_list) > 1: # If there are more than 1 person on the scene
+                s = len(signals_list)
+                n = charades_poses.shape[0]
+                charades_poses.resize(n+s, N)
+                for j in range(s):
+                    charades_poses[n+j, :] = normalize(signals_list[j])
+                    #~ charades_poses[n+j, :] = signals_list[j]
+                    i += s
+                if headtitle not in video_used:
+                    video_used.append(headtitle)
     return (charades_poses, video_used)
 
 def learning(soinn, x_train):
