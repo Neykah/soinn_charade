@@ -120,18 +120,18 @@ def draw_pose(body_parts, im_write=False, im_number=0, im_show=False):
     img = np.zeros((h, w, 3))
     points = []
     N = 28
+    font = cv2.FONT_HERSHEY_SIMPLEX
     for i in range(0, N, 2):
         points.append((body_parts[i], body_parts[i+1]))
-        #~ if points[-1] > (50,50):
-        cv2.circle(img, points[-1], 5, (0, 0, 255), -1)
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(img, str(int(i/2)), points[-1], font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        if points[-1] > (50,50):
+            cv2.circle(img, points[-1], 5, (0, 0, 255), -1)
+            cv2.putText(img, str(int(i/2)), points[-1], font, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
     articulations = [(0, 1), (1, 2), (2, 3), (3, 4), (1, 5), (5, 6), (6, 7),
                      (1, 8), (8, 9), (9, 10), (1, 11), (11, 12), (12, 13)]
     for (i, j) in articulations:
-        #~ if points[i] > (50,50) and points[j] > (50,50):
-        cv2.line(img,points[i], points[j], (255,0,0), 2)
+        if points[i] > (50,50) and points[j] > (50,50):
+            cv2.line(img,points[i], points[j], (255,0,0), 2)
 
     # Print the image
     if im_write:
