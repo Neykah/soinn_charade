@@ -9,10 +9,10 @@ Author: Morgan Lefranc
 
 import sys
 import os
+import random
 import joblib
 import numpy as np
 import cv2
-import random
 
 sys.path.append('/home/morgan/soinn/soinn')
 import openpose_yaml
@@ -43,7 +43,7 @@ def normalize(vector):
 
 def is_reliable(vector, T):
     """
-    For a given vector T=(x,y,confidence_score), check if
+    For a given vector T=(x, y, confidence_score), check if
     points 0 1 2 5 8 11 exist (mandatory for normalizing task !)
     and if their average confidence score > T.
     If so, check if the mean confidence score of the vector
@@ -55,14 +55,9 @@ def is_reliable(vector, T):
     mean_crit_conf = np.mean(crit_conf)
     if 0 not in crit_conf:
         if mean_crit_conf >= T:
-            if mean_conf >= T:
-                return True
-            else:
-                return False
-        else:
-            return False
-    else:
+            return mean_conf >= T
         return False
+    return False
 
 def delete_confidence(vector):
     return [e for i, e in enumerate(vector) if i % 3 != 2]
@@ -136,7 +131,7 @@ def draw_pose(body_parts, im_write=False, im_number=0, im_show=False):
                      (1, 8), (8, 9), (9, 10), (1, 11), (11, 12), (12, 13)]
     for (i, j) in articulations:
         #~ if points[i] > (50,50) and points[j] > (50,50):
-        cv2.line(img,points[i],points[j],(255,0,0),2)
+        cv2.line(img,points[i], points[j], (255,0,0), 2)
 
     # Print the image
     if im_write:
