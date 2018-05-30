@@ -25,18 +25,20 @@ def normalize(vector):
     yI = 0.5 * (vector[17] + vector[23])
     Nx = abs(vector[10]-vector[4]) / 100
     Ny = abs(vector[3]-yI) / 100
-    N = 0.5 * (Nx + Ny)
 
     result = []
     for i, elem in enumerate(vector):
-        elem /= N
         if i == 0:
+            elem /= Nx
             kx = 600 - elem
         elif i == 1:
+            elem /= Ny
             ky = 100 - elem
         if i%2 == 0:
+            elem /= Nx
             elem += kx
         else:
+            elem /= Ny
             elem += ky
         result.append(elem)
     return result
@@ -149,13 +151,13 @@ def main(argv):
     """
     (N_TRAIN, T, delete_node_period, max_edge_age) = (1000, 0.6, 100, 30)
     if len(argv) >= 2:
-        N_TRAIN = argv[1]
+        N_TRAIN = int(argv[1])
     if len(argv) >= 3:
-        T = argv[2]
+        T = int(argv[2])
     if len(argv) >= 4:
-        delete_node_period = argv[3]
+        delete_node_period = int(argv[3])
     if len(argv) >= 5:
-        max_edge_age = argv[4]
+        max_edge_age = int(argv[4])
     if len(argv) >= 6:
         print("""Usage: ./train_charades.py [N_train] [threshold]
               [delete_node period] [max_edge_age]""")
