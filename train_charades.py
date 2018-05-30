@@ -25,20 +25,18 @@ def normalize(vector):
     yI = 0.5 * (vector[17] + vector[23])
     Nx = abs(vector[10]-vector[4]) / 100
     Ny = abs(vector[3]-yI) / 100
+    N = 0.5 * (Nx + Ny)
 
     result = []
     for i, elem in enumerate(vector):
+        elem /= N
         if i == 0:
-            elem /= Nx
             kx = 600 - elem
         elif i == 1:
-            elem /= Ny
             ky = 100 - elem
         if i%2 == 0:
-            elem /= Nx
             elem += kx
         else:
-            elem /= Ny
             elem += ky
         result.append(elem)
     return result
