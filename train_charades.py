@@ -67,8 +67,8 @@ def prepare_dataset(N_train, T):
     """
     print('load Charades/Openpose dataset')
     charades_poses = np.array([])
-    keypoints_dir = '/media/morgan/HDD/Aolab/Data/Charades_keypoints/'
-    index_file_name = '/media/morgan/HDD/Aolab/Data/index_poses'
+    keypoints_dir = '/media/morgan/HDD1/Aolab/Data/Charades_keypoints/'
+    index_file_name = '/media/morgan/HDD1/Aolab/Data/index_poses'
     openpose_yaml.add_constr_repr()
     N = 28
     video_used = []
@@ -82,7 +82,7 @@ def prepare_dataset(N_train, T):
             # Example : CBPJF_000000000016
             title = line[:18]
             headtitle = title[:5]
-            # Example : /media/morgan/HDD/Aolab/Data/Charades_keypoints/CBPJF/CBPJF_000000000016_pose.yml
+            # Example : /media/morgan/HDD1/Aolab/Data/Charades_keypoints/CBPJF/CBPJF_000000000016_pose.yml
             file_name = keypoints_dir + title[:5] + '/' + line.strip('\n')
             print(i)
             # Open the corresponding yaml file.
