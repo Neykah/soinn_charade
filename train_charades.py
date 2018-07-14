@@ -41,6 +41,19 @@ def normalize(vector):
         result.append(elem)
     return result
 
+def new_normalize(vector):
+    x = [e for i, e in enumerate(vector) if i % 2 == 0]
+    y = [e for i, e in enumerate(vector) if i % 2 == 1]
+    x_min, x_max, y_min, y_max = min(x), max(x), min(y), max(y)
+    result = []
+    for i, e in enumerate(vector):
+        if i % 2 == 0:
+            e = 2 * (e - x_min) / (x_max - x_min) - 1
+        else:
+            e = 2 * (e - y_min) / (y_max - y_min) - 1
+        result.append(e)
+    return result
+
 def is_reliable(vector, T):
     """
     For a given vector T=(x, y, confidence_score), check if
@@ -93,7 +106,7 @@ def prepare_dataset(N_train, T):
             if len(signals_list) == 1: # If there is one person on the scene
                 n = charades_poses.shape[0]
                 charades_poses.resize(n+1, N)
-                charades_poses[-1, :] = normalize(signals_list[0])
+                charades_poses[-1, :] = new_normalize(signals_list[0])
                 #~ charades_poses[-1,:] = signals_list[0]
                 i += 1
                 if headtitle not in video_used:
@@ -103,7 +116,7 @@ def prepare_dataset(N_train, T):
                 n = charades_poses.shape[0]
                 charades_poses.resize(n+s, N)
                 for j in range(s):
-                    charades_poses[n+j, :] = normalize(signals_list[j])
+                    charades_poses[n+j, :] = new_normalize(signals_list[j])
                     #~ charades_poses[n+j, :] = signals_list[j]
                     i += s
                 if headtitle not in video_used:
@@ -116,22 +129,32 @@ def learning(soinn, x_train):
 
 def draw_pose(body_parts, im_write=False, im_number=0, im_show=False):
     h, w = 1200, 1200
-    body_parts = np.floor(body_parts).astype(int)
+    draw_body_parts = body_parts.copy()
     img = np.zeros((h, w, 3))
     points = []
     N = 28
     font = cv2.FONT_HERSHEY_SIMPLEX
+
+    # Rescaling for visualisation
+    for i in range(len(draw_body_parts)):
+        draw_body_parts[i] = (draw_body_parts[i] + 1.0) / 2.0
+        if i % 2 == 0:
+            draw_body_parts[i] *= w
+        else:
+            draw_body_parts[i] *= h
+    draw_body_parts = np.floor(draw_body_parts).astype(int)
+
     for i in range(0, N, 2):
-        points.append((body_parts[i], body_parts[i+1]))
-        if points[-1] > (50,50):
-            cv2.circle(img, points[-1], 5, (0, 0, 255), -1)
-            cv2.putText(img, str(int(i/2)), points[-1], font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        points.append((draw_body_parts[i], draw_body_parts[i+1]))
+        # if points[-1] > (50,50):
+        cv2.circle(img, points[-1], 5, (0, 0, 255), -1)
+        cv2.putText(img, str(int(i/2)), points[-1], font, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
     articulations = [(0, 1), (1, 2), (2, 3), (3, 4), (1, 5), (5, 6), (6, 7),
                      (1, 8), (8, 9), (9, 10), (1, 11), (11, 12), (12, 13)]
     for (i, j) in articulations:
-        if points[i] > (50,50) and points[j] > (50,50):
-            cv2.line(img,points[i], points[j], (255,0,0), 2)
+        # if points[i] > (50,50) and points[j] > (50,50):
+        cv2.line(img,points[i], points[j], (255,0,0), 2)
 
     # Print the image
     if im_write:
@@ -168,7 +191,7 @@ def main(argv):
     try:
         soinn_i = joblib.load(dumpfile)
 
-    except FileNotFoundError:
+    except:
         # If no SOINN already exist, define the dataset according to SOINN parameters
         dataset, video_used = prepare_dataset(N_TRAIN, T)
         with open('video_used_{}_{}'.format(N_TRAIN, int(100*T)), 'w') as f:
